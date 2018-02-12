@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "seedrandom": "^2.4.3",
     "webpack-dev-server": "^2.11.1"
   },
   "devDependencies": {
