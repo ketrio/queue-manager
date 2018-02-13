@@ -1,25 +1,31 @@
-const filterWeeknum = (schedules, weekNumber) =>
+const filterSubgroup = (schedules, subgroup) =>
   schedules.map(schedule =>
-    schedule.filter(subject => subject['weekNumber'].includes(weekNumber))
+    schedule.order.filter(subject =>
+      [0, subject.subject.subgroup].includes(subgroup)
+    )
   );
 
-const getSubjects = (subgroup, weekNumber) => {
+const getSubjects = weekNumber => {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.onerror = reject;
     request.onreadystatechange = function() {
       if (this.readyState === 4 && this.status == 200) {
         const response = JSON.parse(this.response);
-        const weekNumber = response['currentWeekNumber'];
-        const schedules = response['schedules']
+        const weekNumber = response.currentWeekNumber;
+        const schedules = response.schedules
           .slice(new Date().getDay() - 1 || 1)
           .map(schedule =>
             schedule.schedule.filter(
-              e =>
-                [0, subgroup].includes(e.numSubgroup) && e.lessonType === 'ЛР'
+              e => e.weekNumber.includes(weekNumber) && e.lessonType === 'ЛР'
             )
           )
-          .map(schedule => schedule.map(period => period.subject))
+          .map(schedule =>
+            schedule.map(period => ({
+              subject: period.subject,
+              subgroup: period.numSubgroup,
+            }))
+          )
           .filter(schedule => schedule.length > 0)
           .map((subjects, i) => {
             const date = new Date();
@@ -39,4 +45,4 @@ const getSubjects = (subgroup, weekNumber) => {
   });
 };
 
-export { filterWeeknum, getSubjects };
+export { filterSubgroup, getSubjects };
