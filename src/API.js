@@ -1,19 +1,3 @@
-const shiftDay = shift => {
-  const currentDate = new Date();
-  currentDate.setDate(currentDate.getDate() + shift);
-  return currentDate;
-};
-
-const clear = schedules =>
-  schedules.map(schedule =>
-    schedule.map(period => {
-      return {
-        subject: period.subject,
-        subgroup: period.numSubgroup,
-      };
-    })
-  );
-
 const filterWeeknum = (schedules, weekNumber) =>
   schedules.map(schedule =>
     schedule.filter(subject => subject['weekNumber'].includes(weekNumber))
@@ -22,12 +6,21 @@ const filterWeeknum = (schedules, weekNumber) =>
 const getSubjects = subgroup => {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
+    request.onerror = reject;
     request.onreadystatechange = function() {
-      if (this.readyState === 4 && this.status == 200) {
+      if (this.status >= 200 && this.status < 400) {
         const response = JSON.parse(this.responseText);
         const weekNumber = response['currentWeekNumber'];
         const schedules = response['schedules']
           .slice(new Date().getDay() - 1 || 1)
+          .map(schedule =>
+            schedule.map(period => {
+              return {
+                subject: period.subject,
+                subgroup: period.numSubgroup,
+              };
+            })
+          )
           .map(schedule =>
             schedule.schedule.filter(
               e =>
@@ -35,7 +28,9 @@ const getSubjects = subgroup => {
             )
           )
           .map((schedule, i) => {
-            return { date: shiftDay(i), schedule };
+            const date = new Date();
+            date.setDate(date.getDate() + i);
+            return { date, schedule };
           });
         resolve({ weekNumber, schedules });
       }
