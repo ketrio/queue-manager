@@ -3,9 +3,10 @@ import { shuffle, daterandom } from './random';
 import students from './students.json';
 
 getSubjects(1).then(res => {
-  const queue = res.schedules.map(schedule => {
+  console.log('res', res);
+  const queue = res.map(schedule => {
     const rnd = daterandom(schedule.date);
-    const order = schedule.subjects.map(subject => {
+    const subjects = schedule.subjects.map(subject => {
       let currentStudents = students.slice();
       if (subject.subgroup > 0) {
         currentStudents = students.filter(
@@ -13,8 +14,9 @@ getSubjects(1).then(res => {
         );
       }
       currentStudents = currentStudents.map(student => student.name);
-      return { subject, line: shuffle(rnd, currentStudents) };
+      return Object.assign({ students: currentStudents }, subject);
     });
-    return { order, date: schedule.date };
+    return { subjects, date: schedule.date };
   });
+  console.log(queue);
 });

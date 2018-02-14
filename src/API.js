@@ -22,7 +22,7 @@ const getSubjects = weekNumber => {
           )
           .map(schedule =>
             schedule.map(period => ({
-              subject: period.subject,
+              name: period.subject,
               subgroup: period.numSubgroup,
             }))
           )
@@ -32,7 +32,7 @@ const getSubjects = weekNumber => {
             date.setDate(date.getDate() + i);
             return { date, subjects };
           });
-        resolve({ weekNumber, schedules });
+        resolve(schedules);
       }
     };
     request.open(
