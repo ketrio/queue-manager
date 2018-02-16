@@ -1,9 +1,29 @@
 const filterSubgroup = (schedules, subgroup) =>
   schedules.map(schedule =>
-    schedule.order.filter(subject =>
-      [0, subject.subject.subgroup].includes(subgroup)
+    schedule.subjects.filter(subject =>
+      [0, subject.subgroup].includes(subgroup)
     )
   );
+
+function* getSubject(schedules, weekNumber, count) {
+  let date = new Date();
+  let returned = 0;
+  while (returned !== count) {
+    const subjects = schedules[date.getDay()]
+      ? schedules[date.getDay()].schedule.filter(
+          e => e.weekNumber.includes(weekNumber) && e.lessonType === "ЛР"
+        )
+      : [];
+    if (subjects && subjects.length > 0) {
+      yield { date: new Date(date), subjects };
+      returned++;
+    }
+    date.setDate(date.getDate() + 1);
+    if (date.getDay() === 0) {
+      weekNumber = (weekNumber + 1) % 4 || 1;
+    }
+  }
+}
 
 const getSubjects = weekNumber => {
   return new Promise((resolve, reject) => {
@@ -12,26 +32,9 @@ const getSubjects = weekNumber => {
     request.onreadystatechange = function() {
       if (this.readyState === 4 && this.status == 200) {
         const response = JSON.parse(this.response);
-        const weekNumber = response.currentWeekNumber;
-        const schedules = response.schedules
-          .slice(new Date().getDay() - 1 || 1)
-          .map(schedule =>
-            schedule.schedule.filter(
-              e => e.weekNumber.includes(weekNumber) && e.lessonType === 'ЛР'
-            )
-          )
-          .map(schedule =>
-            schedule.map(period => ({
-              name: period.subject,
-              subgroup: period.numSubgroup,
-            }))
-          )
-          .filter(schedule => schedule.length > 0)
-          .map((subjects, i) => {
-            const date = new Date();
-            date.setDate(date.getDate() + i);
-            return { date, subjects };
-          });
+        const schedules = Array.from(
+          getSubject(response.schedules, response.weekNumber, 7)
+        );
         resolve(schedules);
       }
     };
