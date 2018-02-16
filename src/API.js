@@ -11,7 +11,7 @@ function* getSubject(schedules, weekNumber, count) {
   while (returned !== count) {
     const subjects = schedules[date.getDay()]
       ? schedules[date.getDay()].schedule.filter(
-          e => e.weekNumber.includes(weekNumber) && e.lessonType === "ЛР"
+          e => e.weekNumber.includes(weekNumber) && e.lessonType === 'ЛР'
         )
       : [];
     if (subjects && subjects.length > 0) {
@@ -27,24 +27,18 @@ function* getSubject(schedules, weekNumber, count) {
 
 const getSubjects = weekNumber => {
   return new Promise((resolve, reject) => {
-    const request = new XMLHttpRequest();
-    request.onerror = reject;
-    request.onreadystatechange = function() {
-      if (this.readyState === 4 && this.status == 200) {
-        const response = JSON.parse(this.response);
+    fetch(
+      'https://students.bsuir.by/api/v1/studentGroup/schedule?studentGroup=653505',
+      { Accept: 'application/json' }
+    )
+      .then(res => res.json())
+      .catch(reject)
+      .then(res => {
         const schedules = Array.from(
-          getSubject(response.schedules, response.weekNumber, 7)
+          getSubject(res.schedules, res.weekNumber, 7)
         );
         resolve(schedules);
-      }
-    };
-    request.open(
-      'GET',
-      'https://students.bsuir.by/api/v1/studentGroup/schedule?studentGroup=653505',
-      true
-    );
-    request.setRequestHeader('Accept', 'application/json');
-    request.send();
+      });
   });
 };
 
