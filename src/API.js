@@ -9,12 +9,16 @@ function* getSubject(schedules, weekNumber, count) {
   let date = new Date();
   let returned = 0;
   while (returned !== count) {
-    const subjects = schedules[date.getDay()]
-      ? schedules[date.getDay()].schedule.filter(
+    const subjects = schedules[date.getDay() - 1]
+      ? schedules[date.getDay() - 1].schedule.filter(
           e => e.weekNumber.includes(weekNumber) && e.lessonType === 'ЛР'
         )
+          .map(subject => ({
+            name: subject.subject,
+            subgroup: subject.numSubgroup,
+          }))
       : [];
-    if (subjects && subjects.length > 0) {
+    if (subjects.length > 0) {
       yield { date: new Date(date), subjects };
       returned++;
     }
@@ -25,7 +29,7 @@ function* getSubject(schedules, weekNumber, count) {
   }
 }
 
-const getSubjects = weekNumber => {
+const getSubjects = () => {
   return new Promise((resolve, reject) => {
     fetch(
       'https://students.bsuir.by/api/v1/studentGroup/schedule?studentGroup=653505',
@@ -34,10 +38,7 @@ const getSubjects = weekNumber => {
       .then(res => res.json())
       .catch(reject)
       .then(res => {
-        const schedules = Array.from(
-          getSubject(res.schedules, res.weekNumber, 7)
-        );
-        resolve(schedules);
+        resolve(Array.from(getSubject(res.schedules, res.currentWeekNumber, 7)));
       });
   });
 };
