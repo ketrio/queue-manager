@@ -15,7 +15,7 @@ import { LinearProgress } from 'rmwc/LinearProgress';
 import { Typography } from 'rmwc/Typography';
 import { Icon } from 'rmwc/Icon';
 import { getSubjects } from '../api/API';
-import { shuffle } from '../api/random';
+import { daterandom, shuffle } from '../api/random';
 import students from '../students.json';
 import '../style.scss';
 
@@ -34,7 +34,7 @@ export default class App extends Component {
             .then(res => {
                 const queue = res.map(schedule => ({
                     subjects: schedule.subjects.map(subj => Object.assign({
-                        students:  shuffle(Math.random, students
+                        students:  shuffle(daterandom(schedule.date), students
                             .slice()
                             .filter(student => subj.subgroup === 0 || student.subgroup === subj.subgroup)
                             .map(student => student.name))
