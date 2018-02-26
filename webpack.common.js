@@ -16,16 +16,8 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: ['/node-modules/'],
+                exclude: /(node_modules|bower_compontents)/,
                 loader: 'babel-loader'
-            },
-            {
-                test: /\.(scss|css)$/,
-                loader: ExtractTextPlugin.extract({
-                    use: ['css-loader', 'sass-loader'],
-                    fallback: 'style-loader',
-                    publicPath: '../'
-                })
             },
             {
                 test: /\.(jpe?g|png)$/,
