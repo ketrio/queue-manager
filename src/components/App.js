@@ -13,7 +13,6 @@ import {
 } from 'rmwc/List';
 import { LinearProgress } from 'rmwc/LinearProgress';
 import { Typography } from 'rmwc/Typography';
-import { Icon } from 'rmwc/Icon';
 import { getSubjects } from '../api/API';
 import { daterandom, shuffle } from '../api/random';
 import students from '../students.json';
@@ -48,6 +47,10 @@ export default class App extends Component {
             });
     }
 
+    componentDidMount() {
+        this.getSubjects();
+    }
+
     render() {
         return(
             <div>
@@ -61,29 +64,35 @@ export default class App extends Component {
                         <ToolbarSection alignStart>
                             <ToolbarTitle>Queue manager v1</ToolbarTitle>
                         </ToolbarSection>
-                        <ToolbarSection alignEnd>
-                            <ToolbarIcon onClick={this.getSubjects} use="shuffle"/>
+                        <ToolbarSection alignEnd>                            
+                            <a rel='noopener noreferrer' target='_blank' href='https://github.com/ketrio/queue-manager'>
+                                <ToolbarIcon>
+                                    <svg strategy='component' aria-hidden="true" height="24" version="1.1" viewBox="0 0 16 16" width="24">
+                                        <path fill="#fff" fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                                    </svg>
+                                </ToolbarIcon>
+                            </a>
                         </ToolbarSection>
                     </ToolbarRow>
                 </Toolbar>
                 <ToolbarFixedAdjust />
                 <div className='container'>
                     {
-                        this.state.queue.length == 0
-                            ? <Typography use='title'>Нажмите <Icon strategy="ligature" use="shuffle" /> чтобы перемешать группу</Typography>
+                        this.state.queue.length == 0 && this.state.fetching
+                            ? <Typography className='loading' use='title'>Загрузка...</Typography>
                             : ''
                     }
                     {this.state.queue.map(e => (
                         <div key={e.date.toDateString()}>
-                            <Typography className='sticky-header' use='title'>{e.date.toLocaleDateString()}</Typography>
+                            <Typography className='sticky-header' use='title'>{e.date.toLocaleDateString('ru-RU')}</Typography>
                             {e.subjects.map(subj => (
                                 <div key={`${e.date.toDateString()}_${subj.name}_${subj.subgroup}`}>
                                     <Typography className='sticky-subheader' use='subheading1'>
                                         {`${subj.name} (${subj.subgroup ? `подгруппа ${subj.subgroup}` : 'вся группа'})`}
                                     </Typography>
                                     {subj.students.map((student, i) => (
-                                        <List key={`${e.date.toDateString()}_${subj.name}_${subj.subgroup}_${student}`}>
-                                            <SimpleListItem graphic='face' text={student} secondaryText={`#${i}`} />
+                                        <List dense key={`${e.date.toDateString()}_${subj.name}_${subj.subgroup}_${student}`}>
+                                            <SimpleListItem graphic='face' text={student} secondaryText={`#${i + 1}`} />
                                         </List>
                                     ))}
                                 </div>
