@@ -24,7 +24,7 @@ function* getSubject(schedules, weekNumber, count) {
     }
     date.setDate(date.getDate() + 1);
     if (date.getDay() === 0) {
-      weekNumber = (weekNumber + 1) % 4 || 1;
+      weekNumber = (weekNumber + 1) % 5 || 1;
     }
   }
 }
